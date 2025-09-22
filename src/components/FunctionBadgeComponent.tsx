@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { NodeViewWrapper } from '@tiptap/react'
+import type { ReactNodeViewProps } from '@tiptap/react'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -7,18 +8,7 @@ import { Button } from '@/components/ui/button'
 import { getFunctionSpec, getFunctionDisplayName, getAllFunctionSpecs } from '@/lib/function-utils'
 import { Trash2, ChevronDown, X } from 'lucide-react'
 
-interface FunctionBadgeComponentProps {
-  node: {
-    attrs: {
-      functionId: string
-    }
-  }
-  updateAttributes: (attrs: { functionId: string }) => void
-  deleteNode: () => void
-  editor: any
-}
-
-export function FunctionBadgeComponent({ node, updateAttributes, deleteNode }: FunctionBadgeComponentProps) {
+export function FunctionBadgeComponent({ node, updateAttributes, deleteNode }: ReactNodeViewProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const { functionId } = node.attrs
   

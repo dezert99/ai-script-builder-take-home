@@ -2,6 +2,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { FunctionBadge } from "@/extensions/FunctionBadge";
+import { parseMarkdownWithFunctions } from "@/lib/markdown-parser";
+import { functionSpecs } from "@/data";
 
 const SAMPLE_SCRIPT = `# Simple Color Preference Script
 
@@ -16,11 +19,12 @@ export function Editor() {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      FunctionBadge,
       Placeholder.configure({
         placeholder: "Start writing your script...",
       }),
     ],
-    content: SAMPLE_SCRIPT,
+    content: parseMarkdownWithFunctions(SAMPLE_SCRIPT, functionSpecs),
   });
 
   return (
