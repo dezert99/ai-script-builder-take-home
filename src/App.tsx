@@ -38,7 +38,7 @@ export default function App() {
   const triggerExport = (type: 'copy' | 'download') => {
     if (exportFunctionRef.current) {
       // We need to modify the export function to pass the type
-      (exportFunctionRef.current as any)(type);
+      (exportFunctionRef.current as (type: 'copy' | 'download') => void)(type);
     }
   };
 

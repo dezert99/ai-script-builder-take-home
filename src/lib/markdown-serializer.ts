@@ -38,11 +38,12 @@ function serializeNode(node: JSONContent): string {
     case 'functionBadge':
       return `<% function ${node.attrs?.functionId} %>`
     
-    case 'heading':
+    case 'heading': {
       const level = node.attrs?.level || 1
       const headingPrefix = '#'.repeat(level)
       const headingText = serializeInlineContent(node.content || [])
       return `${headingPrefix} ${headingText}`
+    }
     
     case 'paragraph':
       return serializeInlineContent(node.content || [])
@@ -56,14 +57,16 @@ function serializeNode(node: JSONContent): string {
     case 'listItem':
       return serializeInlineContent(node.content || [])
     
-    case 'blockquote':
+    case 'blockquote': {
       const quotedContent = node.content?.map(n => serializeNode(n)).join('\n') || ''
       return quotedContent.split('\n').map(line => `> ${line}`).join('\n')
+    }
     
-    case 'codeBlock':
+    case 'codeBlock': {
       const language = node.attrs?.language || ''
       const code = node.content?.[0]?.text || ''
       return `\`\`\`${language}\n${code}\n\`\`\``
+    }
     
     case 'horizontalRule':
       return '---'
@@ -115,10 +118,11 @@ function serializeInlineContent(content: JSONContent[]): string {
             case 'strike':
               text = `~~${text}~~`
               break
-            case 'link':
+            case 'link': {
               const href = mark.attrs?.href || ''
               text = `[${text}](${href})`
               break
+            }
           }
         }
       }

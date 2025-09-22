@@ -1,0 +1,68 @@
+/* Remove default browser focus outline from Tiptap editor */
+.ProseMirror {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.ProseMirror:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensure proper line spacing and readability */
+.ProseMirror p {
+  margin: 0.75rem 0;
+}
+
+.ProseMirror h1 {
+  margin: 1.5rem 0 0.75rem 0;
+  font-size: 1.875rem;
+  font-weight: bold;
+}
+
+.ProseMirror h2 {
+  margin: 1.25rem 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.ProseMirror h3 {
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+/* Remove any focus rings on the card container as well */
+.ProseMirror-focused {
+  outline: none !important;
+}
+
+/* Show list markers for ordered and unordered lists */
+.ProseMirror ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+  padding-left: 0.5rem;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  padding-left: 0.5rem;
+}
+
+.ProseMirror li {
+  margin: 0.25rem 0;
+}
+
+/* Ensure list items display properly */
+.ProseMirror ol li {
+  display: list-item;
+  list-style-type: decimal;
+}
+
+.ProseMirror ul li {
+  display: list-item;
+  list-style-type: disc;
+}

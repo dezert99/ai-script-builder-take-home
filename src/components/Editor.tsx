@@ -1,12 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { FunctionBadge } from "@/extensions/FunctionBadge";
+import { EditorToolbar } from "@/components/EditorToolbar";
 import { parseMarkdownWithFunctions } from "@/lib/markdown-parser";
 import { serializeToMarkdown } from "@/lib/markdown-serializer";
 import { functionSpecs } from "@/data";
+import "@/styles/editor.css";
 
 const SAMPLE_SCRIPT = `# Simple Color Preference Script
 
@@ -34,7 +36,7 @@ export function Editor({ onExport, exportRef }: EditorProps) {
     content: parseMarkdownWithFunctions(SAMPLE_SCRIPT, functionSpecs),
   });
 
-  const handleExport = (type: 'copy' | 'download' = 'copy') => {
+  const handleExport = useCallback((type: 'copy' | 'download' = 'copy') => {
     if (!editor) return;
     
     const markdown = serializeToMarkdown(editor);
@@ -49,7 +51,7 @@ export function Editor({ onExport, exportRef }: EditorProps) {
         console.log('Exported markdown:', markdown);
       });
     }
-  };
+  }, [editor, onExport]);
 
   // Expose export function via ref
   useEffect(() => {
@@ -59,8 +61,9 @@ export function Editor({ onExport, exportRef }: EditorProps) {
   }, [exportRef, handleExport]);
 
   return (
-    <Card className="rounded-lg shadow-lg">
-      <CardContent className="p-6">
+    <Card className="rounded-lg shadow-lg overflow-hidden py-0">
+      <EditorToolbar editor={editor} />
+      <CardContent className="p-6 pt-0">
         <EditorContent editor={editor} />
       </CardContent>
     </Card>

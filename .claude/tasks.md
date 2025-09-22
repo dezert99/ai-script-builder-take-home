@@ -353,6 +353,57 @@ const handleExport = () => {
 
 ---
 
+## Task 5.5: Add Editor Toolbar with Formatting Controls
+**Status**: 🔵 Pending Review  
+**Priority**: HIGH  
+**Complexity**: MODERATE  
+**Dependencies**: Task 5  
+
+### Description
+Add a toolbar above the editor with formatting controls for headings, bold, italic, lists, and horizontal rules. Also fix the markdown parsing to properly render headings and structure.
+
+### Acceptance Criteria
+- [ ] Toolbar with heading buttons (H1, H2, H3)
+- [ ] Bold and italic formatting buttons
+- [ ] Bullet list and numbered list buttons  
+- [ ] Horizontal rule button
+- [ ] Proper markdown parsing that renders headings as headings
+- [ ] Clean, consistent styling with existing UI
+
+### Implementation Steps
+1. Create EditorToolbar component with formatting buttons
+2. Fix markdown parsing to use proper Tiptap content initialization
+3. Add toolbar button handlers for each formatting option
+4. Style toolbar to match existing design
+5. Integrate toolbar with Editor component
+
+### Files to Create/Modify
+- `src/components/EditorToolbar.tsx` (NEW)
+- `src/components/Editor.tsx` (MODIFY - add toolbar and fix content parsing)
+- `src/lib/markdown-parser.ts` (MODIFY - fix parsing approach)
+
+### Implementation Guidance
+```typescript
+// Use Tiptap commands for formatting
+editor.chain().focus().toggleHeading({ level: 1 }).run()
+editor.chain().focus().toggleBold().run()
+editor.chain().focus().toggleBulletList().run()
+editor.chain().focus().setHorizontalRule().run()
+
+// Use proper content initialization instead of HTML strings
+const editor = useEditor({
+  extensions: [...],
+  content: {
+    type: 'doc',
+    content: [
+      // Proper JSON content structure
+    ]
+  }
+})
+```
+
+---
+
 ## Task 6: Implement Slash Commands (STRETCH)
 **Status**: 🔴 Not Started  
 **Priority**: MEDIUM  
