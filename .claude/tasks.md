@@ -1,0 +1,342 @@
+# AI Script Builder - Implementation Tasks
+
+## Task Management Instructions
+- Mark task as `🟡 In Progress` when starting
+- Mark task as `🔵 Pending Review` when complete
+- After review approval, mark as `✅ Complete`
+- **DO NOT** start next task until review is approved
+- Provide commit message after each completed task
+
+---
+
+## Task 1: Create FunctionBadge Custom Node Extension
+**Status**: 🔴 Not Started  
+**Priority**: HIGH  
+**Complexity**: MODERATE  
+**Dependencies**: None  
+
+### Description
+Create a custom Tiptap node to represent function placeholders in the editor. This node will be the foundation for rendering interactive badges instead of plain text placeholders.
+
+### Acceptance Criteria
+- [ ] Custom node recognizes function placeholder pattern
+- [ ] Node stores functionId as an attribute
+- [ ] Node is configured as inline, atomic
+- [ ] Node integrates with Tiptap editor
+
+### Implementation Steps
+1. Create `src/extensions/FunctionBadge.ts`
+2. Define node schema with functionId attribute
+3. Configure parseHTML and renderHTML rules
+4. Set up ReactNodeViewRenderer for custom component
+5. Export the extension
+
+### Files to Create/Modify
+- `src/extensions/FunctionBadge.ts` (NEW)
+
+### Implementation Guidance
+```typescript
+// Core structure for the custom node
+import { Node } from '@tiptap/core'
+import { ReactNodeViewRenderer } from '@tiptap/react'
+
+export const FunctionBadge = Node.create({
+  name: 'functionBadge',
+  group: 'inline',
+  inline: true,
+  atom: true,
+  
+  addAttributes() {
+    return {
+      functionId: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-function-id'),
+        renderHTML: attributes => {
+          return { 'data-function-id': attributes.functionId }
+        },
+      },
+    }
+  },
+  
+  parseHTML() {
+    return [
+      {
+        tag: 'function-badge',
+      },
+    ]
+  },
+  
+  renderHTML({ HTMLAttributes }) {
+    return ['function-badge', HTMLAttributes]
+  },
+  
+  addNodeView() {
+    return ReactNodeViewRenderer(FunctionBadgeComponent) // Component from Task 2
+  },
+})
+```
+
+---
+
+## Task 2: Create FunctionBadgeComponent
+**Status**: 🔴 Not Started  
+**Priority**: HIGH  
+**Complexity**: HIGH  
+**Dependencies**: Task 1  
+
+### Description
+Build the React component that renders function badges with interactive features: tooltip on hover, dropdown on click, and delete with confirmation.
+
+### Acceptance Criteria
+- [ ] Badge displays with visual styling
+- [ ] Tooltip shows function description on hover
+- [ ] Dropdown menu opens on click
+- [ ] Can select different function from dropdown
+- [ ] Delete requires confirmation
+- [ ] Component updates node attributes
+
+### Implementation Steps
+1. Create `src/components/FunctionBadgeComponent.tsx`
+2. Implement tooltip using Radix UI
+3. Add dropdown menu for function selection
+4. Create confirmation dialog for deletion
+5. Connect to node attributes via props
+
+### Files to Create/Modify
+- `src/components/FunctionBadgeComponent.tsx` (NEW)
+- `src/lib/function-utils.ts` (NEW - helper functions)
+- `package.json` (ADD @radix-ui/react-tooltip, @radix-ui/react-dialog)
+
+### Implementation Guidance
+```typescript
+// Key interfaces and structure
+interface FunctionBadgeProps {
+  node: {
+    attrs: {
+      functionId: string
+    }
+  }
+  updateAttributes: (attrs: { functionId: string }) => void
+  deleteNode: () => void
+  editor: any
+}
+
+// Use existing functionSpecs from src/data/index.ts
+// Implement with Radix UI components for consistency
+```
+
+---
+
+## Task 3: Implement Markdown Parser for Functions
+**Status**: 🔴 Not Started  
+**Priority**: HIGH  
+**Complexity**: MODERATE  
+**Dependencies**: Tasks 1, 2  
+
+### Description
+Create parser that identifies `<% function UUID %>` patterns in markdown and converts them to function badge nodes when loading content into the editor.
+
+### Acceptance Criteria
+- [ ] Parser identifies all function placeholders
+- [ ] Validates function IDs exist in functionSpecs
+- [ ] Replaces placeholders with function nodes
+- [ ] Preserves all other markdown formatting
+- [ ] Handles edge cases (invalid IDs, malformed syntax)
+
+### Implementation Steps
+1. Create `src/lib/markdown-parser.ts`
+2. Implement regex pattern matching for `<% function UUID %>`
+3. Validate function IDs against functionSpecs
+4. Transform to Tiptap-compatible format
+5. Integrate with editor initialization
+
+### Files to Create/Modify
+- `src/lib/markdown-parser.ts` (NEW)
+- `src/components/Editor.tsx` (MODIFY - use parser on content)
+
+### Implementation Guidance
+```typescript
+// Parser function structure
+export function parseMarkdownWithFunctions(markdown: string, functionSpecs: FunctionSpec[]) {
+  const functionRegex = /<%\s*function\s+([a-f0-9-]+)\s*%>/g;
+  
+  // Validate and replace pattern
+  const processedContent = markdown.replace(functionRegex, (match, functionId) => {
+    const isValid = functionSpecs.some(spec => spec.id === functionId);
+    if (!isValid) {
+      console.warn(`Invalid function ID: ${functionId}`);
+      return match; // Keep original if invalid
+    }
+    return `<function-badge data-function-id="${functionId}"></function-badge>`;
+  });
+  
+  return processedContent;
+}
+```
+
+---
+
+## Task 4: Implement Markdown Serializer
+**Status**: 🔴 Not Started  
+**Priority**: HIGH  
+**Complexity**: MODERATE  
+**Dependencies**: Tasks 1-3  
+
+### Description
+Create serializer that converts editor content back to markdown, replacing function badge nodes with `<% function UUID %>` placeholders.
+
+### Acceptance Criteria
+- [ ] Serializes all function nodes to placeholder syntax
+- [ ] Preserves all markdown formatting
+- [ ] Maintains document structure
+- [ ] Handles nested formatting correctly
+- [ ] Output is valid markdown
+
+### Implementation Steps
+1. Create `src/lib/markdown-serializer.ts`
+2. Implement custom serialization for function nodes
+3. Preserve standard markdown elements
+4. Add export functionality to editor
+5. Test round-trip conversion
+
+### Files to Create/Modify
+- `src/lib/markdown-serializer.ts` (NEW)
+- `src/components/Editor.tsx` (MODIFY - add export button/function)
+- `src/components/EditorHeader.tsx` (MODIFY - add export button)
+
+### Implementation Guidance
+```typescript
+// Use Tiptap's built-in markdown extension if available, or implement custom
+import { getMarkdownFromContent } from '@tiptap/markdown';
+
+export function serializeToMarkdown(editor: Editor) {
+  const json = editor.getJSON();
+  
+  // Custom node handler for functionBadge
+  const customSerializers = {
+    functionBadge: (node: any) => {
+      return `<% function ${node.attrs.functionId} %>`;
+    }
+  };
+  
+  // Combine with default markdown serialization
+  return serializeWithCustomNodes(json, customSerializers);
+}
+```
+
+---
+
+## Task 5: Complete Editor Integration
+**Status**: 🔴 Not Started  
+**Priority**: HIGH  
+**Complexity**: MODERATE  
+**Dependencies**: Tasks 1-4  
+
+### Description
+Integrate all components into the main editor, ensuring smooth data flow and user experience.
+
+### Acceptance Criteria
+- [ ] Editor initializes with parsed markdown
+- [ ] Function badges render correctly
+- [ ] All interactions work (tooltip, dropdown, delete)
+- [ ] Export produces valid markdown
+- [ ] Sample script loads correctly
+
+### Implementation Steps
+1. Update `src/components/Editor.tsx`
+2. Add FunctionBadge extension to editor config
+3. Parse initial content with function parser
+4. Add export functionality
+5. Test all features together
+
+### Files to Modify
+- `src/components/Editor.tsx` (MODIFY)
+- `src/App.tsx` (MODIFY - if needed for state management)
+
+### Implementation Guidance
+```typescript
+// Updated editor configuration
+import { FunctionBadge } from '@/extensions/FunctionBadge';
+import { parseMarkdownWithFunctions } from '@/lib/markdown-parser';
+import { serializeToMarkdown } from '@/lib/markdown-serializer';
+import { functionSpecs } from '@/data';
+
+const editor = useEditor({
+  extensions: [
+    StarterKit,
+    FunctionBadge,
+    Placeholder.configure({
+      placeholder: "Start writing your script...",
+    }),
+  ],
+  content: parseMarkdownWithFunctions(SAMPLE_SCRIPT, functionSpecs),
+  onCreate: ({ editor }) => {
+    // Initial setup if needed
+  },
+});
+
+// Add export function
+const handleExport = () => {
+  const markdown = serializeToMarkdown(editor);
+  console.log('Exported markdown:', markdown);
+  // Could copy to clipboard or download
+};
+```
+
+---
+
+## Task 6: Implement Slash Commands (STRETCH)
+**Status**: 🔴 Not Started  
+**Priority**: MEDIUM  
+**Complexity**: HIGH  
+**Dependencies**: Tasks 1-5  
+
+### Description
+Implement slash command menu that appears when typing `/` and allows selection of functions to insert.
+
+### Acceptance Criteria
+- [ ] Menu appears when typing `/`
+- [ ] Shows all available functions with name and description
+- [ ] Keyboard navigation (arrows, enter, escape)
+- [ ] Mouse selection works
+- [ ] Filters as user types
+- [ ] Inserts function badge on selection
+
+### Implementation Steps
+1. Create `src/extensions/SlashCommands.ts`
+2. Create `src/components/SlashCommandMenu.tsx`
+3. Implement suggestion plugin
+4. Add keyboard navigation
+5. Style the floating menu
+
+### Files to Create/Modify
+- `src/extensions/SlashCommands.ts` (NEW)
+- `src/components/SlashCommandMenu.tsx` (NEW)
+- `src/styles/slash-menu.css` (NEW)
+- `package.json` (ADD @tippyjs/react, tippy.js)
+- `src/components/Editor.tsx` (MODIFY - add extension)
+
+### Implementation Guidance
+```typescript
+// Menu should show:
+// - Function name (from function-utils helper)
+// - Description (gray, smaller text)
+// - Keyboard hints at bottom
+
+// Use Tippy.js for positioning
+// Use suggestion plugin from Tiptap
+```
+
+---
+
+## Completion Checklist
+After all tasks complete:
+- [ ] All function placeholders render as badges
+- [ ] Tooltips show on hover
+- [ ] Dropdown allows function changes
+- [ ] Delete works with confirmation
+- [ ] Markdown serialization preserves formatting
+- [ ] Round-trip (markdown → editor → markdown) works
+- [ ] Slash commands work (if implemented)
+- [ ] No console errors
+- [ ] Code is clean and documented
