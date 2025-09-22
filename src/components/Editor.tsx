@@ -4,11 +4,13 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { FunctionBadge } from "@/extensions/FunctionBadge";
+import { SlashCommands } from "@/extensions/SlashCommands";
 import { EditorToolbar } from "@/components/EditorToolbar";
 import { parseMarkdownWithFunctions } from "@/lib/markdown-parser";
 import { serializeToMarkdown } from "@/lib/markdown-serializer";
 import { functionSpecs } from "@/data";
 import "@/styles/editor.css";
+import "@/styles/slash-menu.css";
 
 const SAMPLE_SCRIPT = `# Simple Color Preference Script
 
@@ -29,8 +31,9 @@ export function Editor({ onExport, exportRef }: EditorProps) {
     extensions: [
       StarterKit,
       FunctionBadge,
+      SlashCommands,
       Placeholder.configure({
-        placeholder: "Start writing your script...",
+        placeholder: "Start writing your script... Type '/' for commands",
       }),
     ],
     content: parseMarkdownWithFunctions(SAMPLE_SCRIPT, functionSpecs),
