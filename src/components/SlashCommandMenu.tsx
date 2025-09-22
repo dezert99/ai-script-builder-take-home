@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react'
 import type { SlashCommandItem } from '@/extensions/SlashCommands'
 
 interface SlashCommandMenuProps {
@@ -13,10 +13,32 @@ export interface SlashCommandMenuRef {
 export const SlashCommandMenu = forwardRef<SlashCommandMenuRef, SlashCommandMenuProps>(
   ({ items, command }, ref) => {
     const [selectedIndex, setSelectedIndex] = useState(0)
+    const selectedItemRef = useRef<HTMLButtonElement>(null)
+    const menuRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
       setSelectedIndex(0)
     }, [items])
+
+    // Scroll selected item into view
+    useEffect(() => {
+      if (selectedItemRef.current && menuRef.current) {
+        const item = selectedItemRef.current
+        const menu = menuRef.current
+        
+        const itemRect = item.getBoundingClientRect()
+        const menuRect = menu.getBoundingClientRect()
+        
+        // Check if item is above the visible area
+        if (itemRect.top < menuRect.top) {
+          item.scrollIntoView({ block: 'start', behavior: 'smooth' })
+        }
+        // Check if item is below the visible area
+        else if (itemRect.bottom > menuRect.bottom) {
+          item.scrollIntoView({ block: 'end', behavior: 'smooth' })
+        }
+      }
+    }, [selectedIndex])
 
     const selectItem = (index: number) => {
       const item = items[index]
@@ -69,10 +91,11 @@ export const SlashCommandMenu = forwardRef<SlashCommandMenuRef, SlashCommandMenu
     }
 
     return (
-      <div className="slash-menu">
+      <div className="slash-menu" ref={menuRef}>
         {items.map((item, index) => (
           <button
             key={item.id}
+            ref={index === selectedIndex ? selectedItemRef : null}
             className={`slash-menu-item ${index === selectedIndex ? 'selected' : ''}`}
             onClick={() => selectItem(index)}
             onMouseEnter={() => setSelectedIndex(index)}
