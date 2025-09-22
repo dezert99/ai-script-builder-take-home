@@ -448,6 +448,51 @@ Implement slash command menu that appears when typing `/` and allows selection o
 
 ---
 
+## Task 6.5: Enable Inline Slash Commands
+**Status**: ✅ Complete   
+**Priority**: MEDIUM  
+**Complexity**: MODERATE  
+**Dependencies**: Task 6  
+
+### Description
+Modify slash commands to work inline within existing blocks, not just at the start of new lines. Commands should intelligently handle context - functions insert inline, while block-level commands create new blocks when needed.
+
+### Acceptance Criteria
+- [ ] Slash commands work anywhere in text, not just at line start
+- [ ] Function badges insert inline correctly
+- [ ] Block commands (headings, lists) create new blocks when in middle of text
+- [ ] Block commands convert current block when at start of line
+- [ ] Maintains existing functionality for start-of-line usage
+
+### Implementation Steps
+1. Remove `startOfLine: true` restriction from suggestion config
+2. Update heading commands to detect position context
+3. Update list commands to handle inline vs block context
+4. Update horizontal rule command for context awareness
+5. Test inline insertion of functions and block creation
+
+### Files Modified
+- `src/extensions/SlashCommands.ts` (MODIFY - remove startOfLine restriction, add context detection)
+
+### Implementation Details
+```typescript
+// Context detection pattern used:
+const { from } = range
+const $from = editor.state.doc.resolve(from)
+const isAtStartOfBlock = $from.parentOffset === 0
+
+// Conditional behavior:
+if (isAtStartOfBlock) {
+  // Convert current block
+  editor.chain().focus().deleteRange(range).setHeading({ level: 1 }).run()
+} else {
+  // Create new block
+  editor.chain().focus().deleteRange(range).insertContent('\n').setHeading({ level: 1 }).run()
+}
+```
+
+---
+
 ## Completion Checklist
 After all tasks complete:
 - [ ] All function placeholders render as badges
