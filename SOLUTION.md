@@ -13,6 +13,23 @@ npm run dev
 
 The application will be available at `http://localhost:5173`.
 
+## Dependencies Added
+
+The following dependencies were added to implement the required functionality:
+
+```json
+"@radix-ui/react-dialog": "^1.1.15",
+"@radix-ui/react-tooltip": "^1.2.8",
+"@tiptap/extension-typography": "^3.4.5",
+"@tiptap/suggestion": "^3.4.5"
+```
+
+**Why Added:**
+- **@radix-ui/react-tooltip** - For function badge description tooltips
+- **@radix-ui/react-dialog** - Delete confirmation dialogs
+- **@tiptap/suggestion** - Essential for implementing slash commands with autocomplete
+- **@tiptap/extension-typography** - Additional formatting capabilities for better text rendering
+
 ## Technology Stack & Architecture Decisions
 
 ### Editor Framework: TipTap
