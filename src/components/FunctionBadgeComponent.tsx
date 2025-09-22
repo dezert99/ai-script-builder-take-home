@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button'
 import { getFunctionSpec, getFunctionDisplayName, getAllFunctionSpecs } from '@/lib/function-utils'
 import { Trash2, ChevronDown, X } from 'lucide-react'
 
-export function FunctionBadgeComponent({ node, updateAttributes, deleteNode }: ReactNodeViewProps) {
+export function FunctionBadgeComponent({ node, updateAttributes, deleteNode, editor }: ReactNodeViewProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const { functionId } = node.attrs
   
   const currentSpec = getFunctionSpec(functionId)
@@ -27,82 +28,100 @@ export function FunctionBadgeComponent({ node, updateAttributes, deleteNode }: R
 
   const handleFunctionChange = (newFunctionId: string) => {
     updateAttributes({ functionId: newFunctionId })
+    setIsDropdownOpen(false)
   }
 
   const handleDelete = () => {
     setIsDeleteDialogOpen(false)
     deleteNode()
+    // Focus editor after deletion
+    setTimeout(() => {
+      editor?.commands.focus()
+    }, 0)
   }
+
 
   return (
     <NodeViewWrapper className="inline-block">
-      <Tooltip.Provider>
-        <Tooltip.Root>
-          <Tooltip.Trigger asChild>
-            <div className="inline-flex items-center">
-              <DropdownMenu.Root>
+      <div className="inline-flex items-center">
+        <Tooltip.Provider>
+          <Tooltip.Root open={isDropdownOpen ? false : undefined}>
+            <DropdownMenu.Root open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+              <Tooltip.Trigger asChild>
                 <DropdownMenu.Trigger asChild>
                   <Button
                     variant="outline"
                     size="sm"
                     className="h-7 px-2 py-1 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-800 rounded-md text-sm font-medium inline-flex items-center gap-1"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }}
                   >
                     {getFunctionDisplayName(currentSpec)}
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenu.Trigger>
-                <DropdownMenu.Portal>
-                  <DropdownMenu.Content
-                    className="min-w-[220px] bg-white rounded-md border border-gray-200 shadow-lg p-1 z-50"
-                    align="start"
-                  >
-                    <DropdownMenu.Label className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Select Function
-                    </DropdownMenu.Label>
-                    <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
-                    {allSpecs.map((spec) => (
-                      <DropdownMenu.Item
-                        key={spec.id}
-                        className="px-2 py-2 text-sm rounded cursor-pointer hover:bg-gray-100 focus:bg-gray-100 outline-none"
-                        onSelect={() => handleFunctionChange(spec.id)}
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">
-                            {getFunctionDisplayName(spec)}
-                          </span>
-                          <span className="text-xs text-gray-500 mt-0.5">
-                            {spec.description}
-                          </span>
-                        </div>
-                      </DropdownMenu.Item>
-                    ))}
-                    <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
-                    <DropdownMenu.Item
-                      className="px-2 py-2 text-sm rounded cursor-pointer hover:bg-red-50 focus:bg-red-50 outline-none text-red-600"
-                      onSelect={() => setIsDeleteDialogOpen(true)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Trash2 className="h-3 w-3" />
-                        Delete Function
-                      </div>
-                    </DropdownMenu.Item>
-                  </DropdownMenu.Content>
-                </DropdownMenu.Portal>
-              </DropdownMenu.Root>
-            </div>
-          </Tooltip.Trigger>
-          <Tooltip.Portal>
-            <Tooltip.Content
-              className="px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg z-50 max-w-xs"
-              side="top"
-              sideOffset={5}
+              </Tooltip.Trigger>
+              <Tooltip.Portal>
+                <Tooltip.Content
+                  className="px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg z-50 max-w-xs"
+                  side="top"
+                  sideOffset={5}
+                >
+                  {currentSpec.description}
+                  <Tooltip.Arrow className="fill-gray-900" />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              className="min-w-[220px] bg-white rounded-md border border-gray-200 shadow-lg p-1 z-50"
+              align="start"
+              onCloseAutoFocus={(e) => {
+                e.preventDefault()
+                // Simple focus restoration without position interference
+                editor?.commands.focus()
+              }}
             >
-              {currentSpec.description}
-              <Tooltip.Arrow className="fill-gray-900" />
-            </Tooltip.Content>
-          </Tooltip.Portal>
-        </Tooltip.Root>
-      </Tooltip.Provider>
+              <DropdownMenu.Label className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Select Function
+              </DropdownMenu.Label>
+              <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
+              {allSpecs.map((spec) => (
+                <DropdownMenu.Item
+                  key={spec.id}
+                  className="px-2 py-2 text-sm rounded cursor-pointer hover:bg-gray-100 focus:bg-gray-100 outline-none"
+                  onSelect={() => handleFunctionChange(spec.id)}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900">
+                      {getFunctionDisplayName(spec)}
+                    </span>
+                    <span className="text-xs text-gray-500 mt-0.5">
+                      {spec.description}
+                    </span>
+                  </div>
+                </DropdownMenu.Item>
+              ))}
+              <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
+              <DropdownMenu.Item
+                className="px-2 py-2 text-sm rounded cursor-pointer hover:bg-red-50 focus:bg-red-50 outline-none text-red-600"
+                onSelect={() => {
+                  setIsDeleteDialogOpen(true)
+                  setIsDropdownOpen(false)
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <Trash2 className="h-3 w-3" />
+                  Delete Function
+                </div>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+            </Tooltip.Root>
+          </Tooltip.Provider>
+      </div>
 
       <Dialog.Root open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <Dialog.Portal>

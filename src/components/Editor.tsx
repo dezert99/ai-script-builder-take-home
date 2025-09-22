@@ -36,7 +36,7 @@ export function Editor({ onExport, exportRef }: EditorProps) {
         placeholder: "Start writing your script... Type '/' for commands",
       }),
     ],
-    content: parseMarkdownWithFunctions(SAMPLE_SCRIPT, functionSpecs),
+    content: parseMarkdownWithFunctions(SAMPLE_SCRIPT, functionSpecs)
   });
 
   const handleExport = useCallback((type: 'copy' | 'download' = 'copy') => {
@@ -62,6 +62,7 @@ export function Editor({ onExport, exportRef }: EditorProps) {
       exportRef.current = handleExport;
     }
   }, [exportRef, handleExport]);
+
 
   return (
     <Card className="rounded-lg shadow-lg overflow-hidden py-0">
