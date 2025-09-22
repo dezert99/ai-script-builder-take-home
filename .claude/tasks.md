@@ -177,7 +177,7 @@ export function parseMarkdownWithFunctions(markdown: string, functionSpecs: Func
 ---
 
 ## Task 4: Implement Markdown Serializer
-**Status**: 🔴 Not Started  
+**Status**: 🔵 Pending Review  
 **Priority**: HIGH  
 **Complexity**: MODERATE  
 **Dependencies**: Tasks 1-3  
@@ -222,6 +222,74 @@ export function serializeToMarkdown(editor: Editor) {
   // Combine with default markdown serialization
   return serializeWithCustomNodes(json, customSerializers);
 }
+```
+
+---
+
+## Task 4.5: Enhance Export with Copy/Download Options
+**Status**: 🔴 Not Started  
+**Priority**: MEDIUM  
+**Complexity**: LOW  
+**Dependencies**: Task 4  
+
+### Description
+Enhance the export functionality to provide users with options to either copy the markdown to clipboard or download it as a .md file through a dropdown menu.
+
+### Acceptance Criteria
+- [ ] Replace simple export button with dropdown menu
+- [ ] "Copy to Clipboard" option with success feedback
+- [ ] "Download as File" option that saves .md file
+- [ ] Clean UI with appropriate icons for each option
+- [ ] Proper error handling for both operations
+
+### Implementation Steps
+1. Update EditorHeader to use DropdownMenu from Radix UI
+2. Implement copy to clipboard functionality
+3. Implement file download functionality
+4. Update App.tsx to handle multiple export types
+5. Add appropriate icons and styling
+6. Test both options work correctly
+
+### Files to Modify
+- `src/components/EditorHeader.tsx` (MODIFY - replace button with dropdown)
+- `src/App.tsx` (MODIFY - handle export type parameter)
+- `src/components/Editor.tsx` (MODIFY - if needed for export type handling)
+
+### Implementation Guidance
+```typescript
+// Dropdown menu structure
+<DropdownMenu.Root>
+  <DropdownMenu.Trigger asChild>
+    <Button variant="outline" size="sm">
+      <Download className="h-4 w-4" />
+      Export
+      <ChevronDown className="h-4 w-4" />
+    </Button>
+  </DropdownMenu.Trigger>
+  <DropdownMenu.Content>
+    <DropdownMenu.Item onSelect={() => handleExport('copy')}>
+      <Copy className="h-4 w-4" />
+      Copy to Clipboard
+    </DropdownMenu.Item>
+    <DropdownMenu.Item onSelect={() => handleExport('download')}>
+      <Download className="h-4 w-4" />
+      Download as File
+    </DropdownMenu.Item>
+  </DropdownMenu.Content>
+</DropdownMenu.Root>
+
+// File download implementation
+const downloadMarkdown = (content: string, filename = 'script.md') => {
+  const blob = new Blob([content], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 ```
 
 ---
