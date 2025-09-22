@@ -18,8 +18,8 @@ const SAMPLE_SCRIPT = `# Simple Color Preference Script
 `;
 
 interface EditorProps {
-  onExport?: (markdown: string) => void;
-  exportRef?: React.MutableRefObject<(() => void) | null>;
+  onExport?: (markdown: string, type: 'copy' | 'download') => void;
+  exportRef?: React.MutableRefObject<((type: 'copy' | 'download') => void) | null>;
 }
 
 export function Editor({ onExport, exportRef }: EditorProps) {
@@ -34,13 +34,13 @@ export function Editor({ onExport, exportRef }: EditorProps) {
     content: parseMarkdownWithFunctions(SAMPLE_SCRIPT, functionSpecs),
   });
 
-  const handleExport = () => {
+  const handleExport = (type: 'copy' | 'download' = 'copy') => {
     if (!editor) return;
     
     const markdown = serializeToMarkdown(editor);
     
     if (onExport) {
-      onExport(markdown);
+      onExport(markdown, type);
     } else {
       // Default behavior: copy to clipboard and log
       navigator.clipboard.writeText(markdown).then(() => {

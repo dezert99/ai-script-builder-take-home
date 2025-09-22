@@ -6,21 +6,39 @@ import { Editor } from "@/components/Editor";
 export default function App() {
   const exportFunctionRef = useRef<(() => void) | null>(null);
 
-  const handleExport = (markdown: string) => {
-    
-    // Copy to clipboard
-    navigator.clipboard.writeText(markdown).then(() => {
-      console.log('Markdown exported and copied to clipboard:', markdown);
-      alert('Markdown exported and copied to clipboard!');
-    }).catch(() => {
-      console.log('Exported markdown:', markdown);
-      alert('Markdown exported! Check console for output.');
+  const downloadMarkdown = (content: string, filename = 'script.md') => {
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const copyToClipboard = (content: string) => {
+    navigator.clipboard.writeText(content).then(() => {
+      // Successfully copied to clipboard
+    }).catch((error) => {
+      console.error('Failed to copy to clipboard:', error);
+      console.log('Markdown content:', content);
     });
   };
 
-  const triggerExport = () => {
+  const handleExport = (markdown: string, type: 'copy' | 'download') => {
+    if (type === 'copy') {
+      copyToClipboard(markdown);
+    } else if (type === 'download') {
+      downloadMarkdown(markdown);
+    }
+  };
+
+  const triggerExport = (type: 'copy' | 'download') => {
     if (exportFunctionRef.current) {
-      exportFunctionRef.current();
+      // We need to modify the export function to pass the type
+      (exportFunctionRef.current as any)(type);
     }
   };
 
