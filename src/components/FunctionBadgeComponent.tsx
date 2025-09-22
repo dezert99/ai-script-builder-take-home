@@ -11,6 +11,7 @@ import { Trash2, ChevronDown, X } from 'lucide-react'
 export function FunctionBadgeComponent({ node, updateAttributes, deleteNode, editor }: ReactNodeViewProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false)
   const { functionId } = node.attrs
   
   const currentSpec = getFunctionSpec(functionId)
@@ -45,8 +46,23 @@ export function FunctionBadgeComponent({ node, updateAttributes, deleteNode, edi
     <NodeViewWrapper className="inline-block">
       <div className="inline-flex items-center">
         <Tooltip.Provider>
-          <Tooltip.Root open={isDropdownOpen ? false : undefined}>
-            <DropdownMenu.Root open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+          <Tooltip.Root 
+            open={isTooltipOpen && !isDropdownOpen} 
+            onOpenChange={(open) => {
+              if (!isDropdownOpen) {
+                setIsTooltipOpen(open)
+              }
+            }}
+          >
+            <DropdownMenu.Root 
+              open={isDropdownOpen} 
+              onOpenChange={(open) => {
+                setIsDropdownOpen(open)
+                if (open) {
+                  setIsTooltipOpen(false)
+                }
+              }}
+            >
               <Tooltip.Trigger asChild>
                 <DropdownMenu.Trigger asChild>
                   <Button
