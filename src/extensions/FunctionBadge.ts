@@ -1,5 +1,6 @@
 import { Node } from '@tiptap/core'
 import { ReactNodeViewRenderer } from '@tiptap/react'
+import { FunctionBadgeComponent } from '@/components/FunctionBadgeComponent'
 
 export const FunctionBadge = Node.create({
   name: 'functionBadge',
@@ -32,8 +33,6 @@ export const FunctionBadge = Node.create({
   },
   
   addNodeView() {
-    // This will be imported from the component we create in Task 2
-    // For now, we'll use a placeholder that will be replaced
-    return ReactNodeViewRenderer(() => null) // Temporary placeholder
+    return ReactNodeViewRenderer(FunctionBadgeComponent)
   },
 })

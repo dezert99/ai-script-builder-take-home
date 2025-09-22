@@ -79,7 +79,7 @@ export const FunctionBadge = Node.create({
 ---
 
 ## Task 2: Create FunctionBadgeComponent
-**Status**: 🔴 Not Started  
+**Status**: 🔵 Pending Review  
 **Priority**: HIGH  
 **Complexity**: HIGH  
 **Dependencies**: Task 1  
